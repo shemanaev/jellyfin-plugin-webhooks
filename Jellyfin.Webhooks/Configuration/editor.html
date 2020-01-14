@@ -1,0 +1,38 @@
+<div data-role="page" class="page type-interior" data-controller="webhooks.editor.js">
+    <div>
+        <div class="content-primary">
+            <form class="form-webhook-editor">
+                <input type="hidden" id="hook-id" />
+
+                <div>
+                    <h1>${ButtonAdd} Webhook</h1>
+                </div>
+
+                <div class="inputContainer">
+                    <input id="text-url" is="emby-input" type="url" required="required" label="URL:">
+                    <!--<div class="fieldDescription">Choose wisely.</div>-->
+                </div>
+
+                <div class="selectContainer">
+                    <select id="select-format" is="emby-select" label="Payload format:"></select>
+                    <!--<div class="fieldDescription">Choose wisely.</div>-->
+                </div>
+                <div class="selectContainer">
+                    <select id="select-user" is="emby-select" label="Listen to events only for:"></select>
+                    <!--<div class="fieldDescription">Choose wisely.</div>-->
+                </div>
+
+                <div class="checkboxListContainer">
+                    <h3 class="checkboxListLabel">Events:</h3>
+                    <div class="events-container checkboxList"></div>
+                </div>
+
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block">${ButtonSave}</button>
+                    <button is="emby-button" type="button" class="raised block" onclick="history.back();">${ButtonCancel}</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

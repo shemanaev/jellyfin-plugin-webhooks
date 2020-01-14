@@ -1,0 +1,15 @@
+---
+name: "jellyfin-plugin-webhooks"
+guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
+version: "1.0.0"
+nicename: "Webhooks"
+description: "Webhooks. Flexible and robust"
+overview: >
+  Supports couple of webhook types including Plex one.
+category: "General"
+owner: "shemanaev"
+artifacts:
+  - "Jellyfin.Webhooks.dll"
+build_type: "dotnet"
+dotnet_configuration: "Release"
+dotnet_framework: "netstandard2.0"
