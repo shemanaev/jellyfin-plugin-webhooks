@@ -1,7 +1,8 @@
 ---
 name: "jellyfin-plugin-webhooks"
 guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
-version: "1.0.0"
+version: "1" # Please increment with each pull request
+jellyfin_version: "10.4.3" # The earliest binary-compatible version
 nicename: "Webhooks"
 description: "Webhooks. Flexible and robust"
 overview: >
