@@ -26,4 +26,8 @@
     <EmbeddedResource Include="Configuration\editor.js" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$(ConfigurationName) == Debug">
+    <Exec Command="xcopy /I /Y $(TargetDir) &quot;$(TargetDir)/data/plugins/Jellyfin.Webhooks/&quot;" />
+  </Target>
+
 </Project>
