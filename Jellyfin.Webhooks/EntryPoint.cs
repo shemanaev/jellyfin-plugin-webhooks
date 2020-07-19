@@ -146,7 +146,7 @@ namespace Jellyfin.Webhooks
                 {
                     Id = _appHost.SystemId,
                     Name = _appHost.FriendlyName,
-                    Version = _appHost.ApplicationVersion,
+                    Version = _appHost.ApplicationVersion.ToString(),
                 },
             });
         }

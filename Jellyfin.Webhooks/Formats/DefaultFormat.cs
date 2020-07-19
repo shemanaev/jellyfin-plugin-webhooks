@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
@@ -47,7 +48,7 @@ namespace Jellyfin.Webhooks.Formats
                 Url = url.ToString(),
                 RequestContent = content,
             };
-            await _http.SendAsync(options, "POST");
+            await _http.SendAsync(options, HttpMethod.Post);
         }
     }
 

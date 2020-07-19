@@ -72,7 +72,7 @@ define(['loading', 'globalize', 'dom', 'dashboardcss', 'emby-input', 'emby-butto
     function fillOptions(view) {
         view.querySelector('#select-format').innerHTML = FORMATS.map(getFormatHtml).join('');
         view.querySelector('.events-container').innerHTML = EVENTS.map(getEventHtml).join('');
-        ApiClient.getUsers().then(users => {
+        return ApiClient.getUsers().then(users => {
             const defaultUsers = [{ Id: '', Name: globalize.translate('OptionAllUsers') }];
             view.querySelector('#select-user').innerHTML = defaultUsers.concat(users).map(getUserHtml).join('');
         });
@@ -95,8 +95,9 @@ define(['loading', 'globalize', 'dom', 'dashboardcss', 'emby-input', 'emby-butto
     }
 
     function onViewShow(params) {
-        fillOptions(this);
-        loadData(this, params.id);
+        fillOptions(this).then(() =>
+            loadData(this, params.id)
+        );
     }
 
     return function (view, params) {

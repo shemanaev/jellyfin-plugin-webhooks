@@ -52,7 +52,7 @@ define(['loading', 'confirm', 'globalize', 'dom', 'dashboardcss', 'emby-input', 
         result += '</div>'; // listItemBody
         result += '<button type="button" is="paper-icon-button-light" class="btn-webhook-delete paper-icon-button-light"';
         result += ' data-hookid="' + hook.Id + '" title="' + globalize.translate('ButtonDelete') + '">';
-        result += '<i class="md-icon">delete</i></button>';
+        result += '<span class="material-icons delete"></span></button>';
         result += '</div>'; // listItem
         return result;
     }

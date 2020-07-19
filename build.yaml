@@ -1,16 +1,14 @@
 ---
-name: "jellyfin-plugin-webhooks"
+name: "Webhooks"
 guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
-version: "1" # Please increment with each pull request
-jellyfin_version: "10.4.3" # The earliest binary-compatible version
-nicename: "Webhooks"
-description: "Webhooks. Flexible and robust"
-overview: >
+version: "1.0.0.1"
+targetAbi: "10.6.0.0"
+overview: "Webhooks. Flexible and robust"
+description: >
   Supports couple of webhook types including Plex one.
 category: "General"
 owner: "shemanaev"
 artifacts:
   - "Jellyfin.Webhooks.dll"
-build_type: "dotnet"
-dotnet_configuration: "Release"
-dotnet_framework: "netstandard2.0"
+changelog: >
+  Updated for 10.6

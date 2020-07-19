@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using MediaBrowser.Common.Net;
@@ -31,7 +32,7 @@ namespace Jellyfin.Webhooks.Formats
                 EnableDefaultUserAgent = true,
                 Url = builder.Uri.ToString(),
             };
-            await _http.SendAsync(options, "GET");
+            await _http.SendAsync(options, HttpMethod.Get);
         }
     }
 }
