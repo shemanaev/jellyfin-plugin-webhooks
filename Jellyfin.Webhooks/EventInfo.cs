@@ -1,3 +1,4 @@
+using Jellyfin.Data.Entities;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
 using MediaBrowser.Controller.Entities;

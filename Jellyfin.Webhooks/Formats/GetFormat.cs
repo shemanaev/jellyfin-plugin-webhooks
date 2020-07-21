@@ -20,7 +20,7 @@ namespace Jellyfin.Webhooks.Formats
             var builder = new UriBuilder(url);
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["event"] = info.Event.ToString();
-            query["user"] = info.User.Name;
+            query["user"] = info.User.Username;
             query["server"] = info.Server.Name;
             query["media_type"] = info.Item.MediaType;
             builder.Query = query.ToString();

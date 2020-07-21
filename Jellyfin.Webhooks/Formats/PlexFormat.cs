@@ -26,11 +26,11 @@ namespace Jellyfin.Webhooks.Formats
             {
                 @event = GetEventName(info.Event),
                 user = true,
-                owner = info.User.Policy.IsAdministrator,
+                owner = info.User.HasPermission(Data.Enums.PermissionKind.IsAdministrator),
                 Account = new
                 {
                     id = info.User.Id,
-                    title = info.User.Name
+                    title = info.User.Username
                 },
                 Server = new
                 {
@@ -105,17 +105,17 @@ namespace Jellyfin.Webhooks.Formats
             if (item is Episode episode)
             {
                 var provider = "thetvdb";
-                var id = episode.Series.GetProviderId(MetadataProviders.Tvdb);
+                var id = episode.Series.GetProviderId(MetadataProvider.Tvdb);
                 if (string.IsNullOrEmpty(id))
                 {
-                    id = episode.Series.GetProviderId(MetadataProviders.Tmdb);
+                    id = episode.Series.GetProviderId(MetadataProvider.Tmdb);
                     provider = "themoviedb";
                 }
                 return $"com.plexapp.agents.{provider}://{id}/{episode.Season.IndexNumber}/{episode.IndexNumber}?lang=en";
             }
             if (item is Movie movie)
             {
-                var imdbId = movie.GetProviderId(MetadataProviders.Imdb);
+                var imdbId = movie.GetProviderId(MetadataProvider.Imdb);
                 return $"com.plexapp.agents.imdb://{imdbId}?lang=en";
             }
             if (item is Audio)
