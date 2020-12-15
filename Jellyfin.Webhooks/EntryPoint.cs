@@ -98,12 +98,13 @@ namespace Jellyfin.Webhooks
             }
             else
             {
+                // don't scrobble virtual items
+                if (e.MediaInfo.Path == null || e.MediaInfo.LocationType == LocationType.Virtual) return;
+
                 var id = e.MediaInfo.Id;
                 float percentageWatched = (float)e.Session.PlayState.PositionTicks / (float)e.Session.NowPlayingItem.RunTimeTicks * 100f;
                 if (percentageWatched >= 90 && !_scrobbled.Contains(id))
                 {
-                    // don't scrobble virtual items
-                    if (e.MediaInfo.Path == null || e.MediaInfo.LocationType == LocationType.Virtual) return;
                     await PlaybackEvent(HookEvent.Scrobble, e.Item, e.Session, e.Users);
                     _scrobbled.Add(id);
                 }
