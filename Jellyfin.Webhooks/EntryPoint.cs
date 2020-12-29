@@ -99,7 +99,10 @@ namespace Jellyfin.Webhooks
             else
             {
                 // don't scrobble virtual items
-                if (e.MediaInfo.Path == null || e.MediaInfo.LocationType == LocationType.Virtual) return;
+                if (e.MediaInfo.Path == null
+                    || !e.MediaInfo.LocationType.HasValue || e.MediaInfo.LocationType == LocationType.Virtual
+                    || !e.Session.PlayState.PositionTicks.HasValue
+                    || !e.Session.NowPlayingItem.RunTimeTicks.HasValue) return;
 
                 var id = e.MediaInfo.Id;
                 float percentageWatched = (float)e.Session.PlayState.PositionTicks / (float)e.Session.NowPlayingItem.RunTimeTicks * 100f;
