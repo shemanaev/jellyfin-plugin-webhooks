@@ -1,26 +1,25 @@
 using System;
 using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
-using MediaBrowser.Common.Net;
+using MediaBrowser.Common.Json;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
-using MediaBrowser.Model.Serialization;
 
 namespace Jellyfin.Webhooks.Formats
 {
     internal class DefaultFormat : IFormat
     {
-        private readonly IJsonSerializer _json;
-        private readonly IHttpClient _http;
+        private readonly HttpClient _http;
         private readonly IDtoService _dto;
         private readonly IUserManager _users;
 
-        public DefaultFormat(IJsonSerializer json, IHttpClient http, IDtoService dto, IUserManager users)
+        public DefaultFormat(HttpClient http, IDtoService dto, IUserManager users)
         {
-            _json = json;
             _http = http;
             _dto = dto;
             _users = users;
@@ -39,16 +38,8 @@ namespace Jellyfin.Webhooks.Formats
                 Server = info.Server
             };
 
-            var content = _json.SerializeToString(body);
-            var options = new HttpRequestOptions
-            {
-                RequestContentType = "application/json",
-                LogErrorResponseBody = true,
-                EnableDefaultUserAgent = true,
-                Url = url.ToString(),
-                RequestContent = content,
-            };
-            await _http.SendAsync(options, HttpMethod.Post);
+            var content = new StringContent(JsonSerializer.Serialize(body, JsonDefaults.GetOptions()), Encoding.UTF8, "application/json");
+            await _http.PostAsync(url, content);
         }
     }
 

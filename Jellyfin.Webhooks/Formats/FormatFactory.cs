@@ -1,22 +1,20 @@
+using System.Net.Http;
 using Jellyfin.Webhooks.Configuration;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.Serialization;
 
 namespace Jellyfin.Webhooks.Formats
 {
     internal class FormatFactory
     {
-        private readonly IJsonSerializer _json;
-        private readonly IHttpClient _http;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IDtoService _dto;
         private readonly IUserManager _users;
 
-        public FormatFactory(IJsonSerializer json, IHttpClient http, IDtoService dto, IUserManager users)
+        public FormatFactory(IHttpClientFactory http, IDtoService dto, IUserManager users)
         {
-            _json = json;
-            _http = http;
+            _httpClientFactory = http;
             _dto = dto;
             _users = users;
         }
@@ -26,14 +24,20 @@ namespace Jellyfin.Webhooks.Formats
             switch (format)
             {
                 case HookFormat.Get:
-                    return new GetFormat(_http);
+                    return new GetFormat(GetHttpClient());
 
                 case HookFormat.Plex:
-                    return new PlexFormat(_json);
+                    return new PlexFormat();
 
                 default:
-                    return new DefaultFormat(_json, _http, _dto, _users);
+                    return new DefaultFormat(GetHttpClient(), _dto, _users);
             }
+        }
+
+        private HttpClient GetHttpClient()
+        {
+            var client = _httpClientFactory.CreateClient(NamedClient.Default);
+            return client;
         }
     }
 }

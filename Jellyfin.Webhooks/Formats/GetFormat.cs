@@ -2,15 +2,14 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using MediaBrowser.Common.Net;
 
 namespace Jellyfin.Webhooks.Formats
 {
     internal class GetFormat : IFormat
     {
-        private readonly IHttpClient _http;
+        private readonly HttpClient _http;
 
-        public GetFormat(IHttpClient http)
+        public GetFormat(HttpClient http)
         {
             _http = http;
         }
@@ -25,14 +24,7 @@ namespace Jellyfin.Webhooks.Formats
             query["media_type"] = info.Item.MediaType;
             builder.Query = query.ToString();
 
-            var options = new HttpRequestOptions
-            {
-                RequestContentType = "text/html",
-                LogErrorResponseBody = true,
-                EnableDefaultUserAgent = true,
-                Url = builder.Uri.ToString(),
-            };
-            await _http.SendAsync(options, HttpMethod.Get);
+            await _http.GetAsync(builder.Uri);
         }
     }
 }

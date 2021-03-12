@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
 using Jellyfin.Webhooks.Formats;
-using MediaBrowser.Common.Net;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
@@ -26,7 +26,6 @@ namespace Jellyfin.Webhooks
         private readonly IUserDataManager _userDataManager;
         private readonly IUserManager _userManager;
         private readonly IServerApplicationHost _appHost;
-        private readonly IHttpClient _http;
         private readonly List<Guid> _scrobbled;
         private readonly Dictionary<string, DeviceState> _deviceStates;
         private readonly FormatFactory _formatFactory;
@@ -38,8 +37,7 @@ namespace Jellyfin.Webhooks
             IUserManager userManager,
             IDtoService dtoService,
             IServerApplicationHost appHost,
-            IJsonSerializer json,
-            IHttpClient http
+            IHttpClientFactory httpClientFactory
             )
         {
             _logger = logger.CreateLogger("Webhooks");
@@ -47,11 +45,10 @@ namespace Jellyfin.Webhooks
             _userDataManager = userDataManager;
             _userManager = userManager;
             _appHost = appHost;
-            _http = http;
 
             _scrobbled = new List<Guid>();
             _deviceStates = new Dictionary<string, DeviceState>();
-            _formatFactory = new FormatFactory(json, http, dtoService, _userManager);
+            _formatFactory = new FormatFactory(httpClientFactory, dtoService, _userManager);
         }
 
         public void Dispose()

@@ -1,23 +1,21 @@
 using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
+using MediaBrowser.Common.Json;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Serialization;
 
 namespace Jellyfin.Webhooks.Formats
 {
     internal class PlexFormat : IFormat
     {
-        private readonly IJsonSerializer _json;
-
-        public PlexFormat(IJsonSerializer json)
+        public PlexFormat()
         {
-            _json = json;
         }
 
         public async Task Format(Uri url, EventInfo info)
@@ -58,7 +56,7 @@ namespace Jellyfin.Webhooks.Formats
                     duration = info.Item.RunTimeTicks / 1000,
                 }
             };
-            var content = _json.SerializeToString(body);
+            var content = JsonSerializer.Serialize(body, JsonDefaults.GetOptions());
             var form = new MultipartFormDataContent
             {
                 { new StringContent(content), "payload" }
