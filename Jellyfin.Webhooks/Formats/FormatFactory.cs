@@ -19,20 +19,12 @@ namespace Jellyfin.Webhooks.Formats
             _users = users;
         }
 
-        public IFormat CreateFormat(HookFormat format)
+        public IFormat CreateFormat(HookFormat format) => format switch
         {
-            switch (format)
-            {
-                case HookFormat.Get:
-                    return new GetFormat(GetHttpClient());
-
-                case HookFormat.Plex:
-                    return new PlexFormat();
-
-                default:
-                    return new DefaultFormat(GetHttpClient(), _dto, _users);
-            }
-        }
+            HookFormat.Get => new GetFormat(GetHttpClient()),
+            HookFormat.Plex => new PlexFormat(),
+            _ => new DefaultFormat(GetHttpClient(), _dto, _users),
+        };
 
         private HttpClient GetHttpClient()
         {

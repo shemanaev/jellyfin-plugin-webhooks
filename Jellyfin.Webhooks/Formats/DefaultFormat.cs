@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
-using MediaBrowser.Common.Json;
+using Jellyfin.Extensions.Json;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
@@ -38,7 +38,7 @@ namespace Jellyfin.Webhooks.Formats
                 Server = info.Server
             };
 
-            var content = new StringContent(JsonSerializer.Serialize(body, JsonDefaults.GetOptions()), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(body, JsonDefaults.Options), Encoding.UTF8, "application/json");
             await _http.PostAsync(url, content);
         }
     }

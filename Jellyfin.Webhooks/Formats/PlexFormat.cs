@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
-using MediaBrowser.Common.Json;
+using Jellyfin.Extensions.Json;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
 using MediaBrowser.Controller.Entities.Movies;
@@ -56,49 +56,31 @@ namespace Jellyfin.Webhooks.Formats
                     duration = info.Item.RunTimeTicks / 1000,
                 }
             };
-            var content = JsonSerializer.Serialize(body, JsonDefaults.GetOptions());
+            var content = JsonSerializer.Serialize(body, JsonDefaults.Options);
             var form = new MultipartFormDataContent
             {
                 { new StringContent(content), "payload" }
             };
 
-            using (var httpClient = new HttpClient())
-            {
-                var response = await httpClient.PostAsync(url, form);
-                response.EnsureSuccessStatusCode();
-                var status = await response.Content.ReadAsStringAsync();
-                // status from SIMKL can be "OK" or "FAIL"
-            }
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsync(url, form);
+            response.EnsureSuccessStatusCode();
+            var status = await response.Content.ReadAsStringAsync();
+            // status from SIMKL can be "OK" or "FAIL"
         }
 
-        private string GetEventName(HookEvent evt)
+        private static string GetEventName(HookEvent evt) => evt switch
         {
-            switch (evt)
-            {
-                case HookEvent.Pause:
-                    return "media.pause";
+            HookEvent.Pause => "media.pause",
+            HookEvent.Resume => "media.resume",
+            HookEvent.Stop => "media.stop",
+            HookEvent.Scrobble => "media.scrobble",
+            HookEvent.Rate => "media.rate",
+            HookEvent.MarkPlayed => "media.scrobble",
+            _ => "media.play",
+        };
 
-                case HookEvent.Resume:
-                    return "media.resume";
-
-                case HookEvent.Stop:
-                    return "media.stop";
-
-                case HookEvent.Scrobble:
-                    return "media.scrobble";
-
-                case HookEvent.Rate:
-                    return "media.rate";
-
-                case HookEvent.MarkPlayed:
-                    return "media.scrobble";
-
-                default:
-                    return "media.play";
-            }
-        }
-
-        private string GetGuid(BaseItem item)
+        private static string GetGuid(BaseItem item)
         {
             if (item is Episode episode)
             {
@@ -123,7 +105,7 @@ namespace Jellyfin.Webhooks.Formats
             return $"com.plexapp.agents.unknown://{item.Name}";
         }
 
-        private string GetMediaType(BaseItem item)
+        private static string GetMediaType(BaseItem item)
         {
             if (item is Episode) return "episode";
             if (item is Movie) return "movie";
@@ -131,7 +113,7 @@ namespace Jellyfin.Webhooks.Formats
             return "unknown";
         }
 
-        private string GetSectionType(BaseItem item)
+        private static string GetSectionType(BaseItem item)
         {
             if (item is Episode) return "show";
             if (item is Movie) return "movie";
