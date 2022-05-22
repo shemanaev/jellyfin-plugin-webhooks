@@ -1,7 +1,7 @@
 ---
 name: "Webhooks"
 guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
-version: "3.0.0.0"
+version: "3.1.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Webhooks. Flexible and robust"
@@ -12,4 +12,4 @@ owner: "shemanaev"
 artifacts:
   - "Jellyfin.Webhooks.dll"
 changelog: >
-  Update for 10.8 compatibility
+  Add new event types
