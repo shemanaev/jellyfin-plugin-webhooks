@@ -4,17 +4,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Data.Entities;
+using Jellyfin.Data.Events;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
 using Jellyfin.Webhooks.Formats;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.Authentication;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Controller.Session;
+using MediaBrowser.Controller.Subtitles;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Webhooks
@@ -25,6 +27,8 @@ namespace Jellyfin.Webhooks
         private readonly ISessionManager _sessionManager;
         private readonly IUserDataManager _userDataManager;
         private readonly IUserManager _userManager;
+        private readonly ILibraryManager _libraryManager;
+        private readonly ISubtitleManager _subtitleManager;
         private readonly IServerApplicationHost _appHost;
         private readonly List<Guid> _scrobbled;
         private readonly Dictionary<string, DeviceState> _deviceStates;
@@ -35,6 +39,8 @@ namespace Jellyfin.Webhooks
             ISessionManager sessionManager,
             IUserDataManager userDataManager,
             IUserManager userManager,
+            ILibraryManager libraryManager,
+            ISubtitleManager subtitleManager,
             IDtoService dtoService,
             IServerApplicationHost appHost,
             IHttpClientFactory httpClientFactory
@@ -44,6 +50,8 @@ namespace Jellyfin.Webhooks
             _sessionManager = sessionManager;
             _userDataManager = userDataManager;
             _userManager = userManager;
+            _libraryManager = libraryManager;
+            _subtitleManager = subtitleManager;
             _appHost = appHost;
 
             _scrobbled = new List<Guid>();
@@ -56,7 +64,20 @@ namespace Jellyfin.Webhooks
             _sessionManager.PlaybackStart -= OnPlaybackStart;
             _sessionManager.PlaybackStopped -= OnPlaybackStopped;
             _sessionManager.PlaybackProgress -= OnPlaybackProgress;
+            _sessionManager.AuthenticationFailed -= OnAuthenticationFailed;
+            _sessionManager.AuthenticationSucceeded -= OnAuthenticationSucceeded;
+            _sessionManager.SessionStarted -= OnSessionStarted;
+            _sessionManager.SessionEnded -= OnSessionEnded;
+
             _userDataManager.UserDataSaved -= OnUserDataSaved;
+
+            _libraryManager.ItemAdded -= OnItemAdded;
+            _libraryManager.ItemRemoved -= OnItemRemoved;
+            _libraryManager.ItemUpdated -= OnItemUpdated;
+
+            _subtitleManager.SubtitleDownloadFailure -= OnSubtitleDownloadFailure;
+
+            _appHost.HasPendingRestartChanged -= HasPendingRestartChanged;
         }
 
         public Task RunAsync()
@@ -64,7 +85,20 @@ namespace Jellyfin.Webhooks
             _sessionManager.PlaybackStart += OnPlaybackStart;
             _sessionManager.PlaybackStopped += OnPlaybackStopped;
             _sessionManager.PlaybackProgress += OnPlaybackProgress;
+            _sessionManager.AuthenticationFailed += OnAuthenticationFailed;
+            _sessionManager.AuthenticationSucceeded += OnAuthenticationSucceeded;
+            _sessionManager.SessionStarted += OnSessionStarted;
+            _sessionManager.SessionEnded += OnSessionEnded;
+
             _userDataManager.UserDataSaved += OnUserDataSaved;
+
+            _libraryManager.ItemAdded += OnItemAdded;
+            _libraryManager.ItemRemoved += OnItemRemoved;
+            _libraryManager.ItemUpdated += OnItemUpdated;
+
+            _subtitleManager.SubtitleDownloadFailure += OnSubtitleDownloadFailure;
+
+            _appHost.HasPendingRestartChanged += HasPendingRestartChanged;
 
             return Task.CompletedTask;
         }
@@ -131,6 +165,132 @@ namespace Jellyfin.Webhooks
 
             var user = _userManager.GetUserById(e.UserId);
             await PlaybackEvent(evt, e.Item, null, user);
+        }
+
+        private async void OnItemAdded(object sender, ItemChangeEventArgs e)
+        {
+            await LibraryEvent(HookEvent.ItemAdded, e.Item, e.UpdateReason);
+        }
+
+        private async void OnItemRemoved(object sender, ItemChangeEventArgs e)
+        {
+            await LibraryEvent(HookEvent.ItemRemoved, e.Item, e.UpdateReason);
+        }
+
+        private async void OnItemUpdated(object sender, ItemChangeEventArgs e)
+        {
+            await LibraryEvent(HookEvent.ItemUpdated, e.Item, e.UpdateReason);
+        }
+
+        private async void OnAuthenticationSucceeded(object sender, GenericEventArgs<AuthenticationResult> e)
+        {
+            var user = _userManager.GetUserById(e.Argument.User.Id);
+            await ExecuteWebhook(new EventInfo
+            {
+                Event = HookEvent.AuthenticationSucceeded,
+                Session = new SessionInfoDto(e.Argument.SessionInfo),
+                User = user,
+                Server = new ServerInfoDto
+                {
+                    Id = _appHost.SystemId,
+                    Name = _appHost.FriendlyName,
+                    Version = _appHost.ApplicationVersion.ToString(),
+                },
+            });
+        }
+
+        private async void OnAuthenticationFailed(object sender, GenericEventArgs<AuthenticationRequest> e)
+        {
+            await ExecuteWebhook(new EventInfo
+            {
+                Event = HookEvent.AuthenticationFailed,
+                AdditionalData = e.Argument,
+                Server = new ServerInfoDto
+                {
+                    Id = _appHost.SystemId,
+                    Name = _appHost.FriendlyName,
+                    Version = _appHost.ApplicationVersion.ToString(),
+                },
+            });
+        }
+
+        private async void OnSessionStarted(object sender, SessionEventArgs e)
+        {
+            await SessionEvent(HookEvent.SessionStarted, e.SessionInfo);
+        }
+
+        private async void OnSessionEnded(object sender, SessionEventArgs e)
+        {
+            await SessionEvent(HookEvent.SessionEnded, e.SessionInfo);
+        }
+
+        private async void OnSubtitleDownloadFailure(object sender, SubtitleDownloadFailureEventArgs e)
+        {
+
+            await ExecuteWebhook(new EventInfo
+            {
+                Event = HookEvent.SubtitleDownloadFailure,
+                Item = e.Item,
+                AdditionalData = e.Exception,
+                Server = new ServerInfoDto
+                {
+                    Id = _appHost.SystemId,
+                    Name = _appHost.FriendlyName,
+                    Version = _appHost.ApplicationVersion.ToString(),
+                },
+            });
+        }
+
+        private async void HasPendingRestartChanged(object sender, EventArgs e)
+        {
+            await ExecuteWebhook(new EventInfo
+            {
+                Event = HookEvent.HasPendingRestartChanged,
+                Server = new ServerInfoDto
+                {
+                    Id = _appHost.SystemId,
+                    Name = _appHost.FriendlyName,
+                    Version = _appHost.ApplicationVersion.ToString(),
+                },
+            });
+        }
+
+        private async Task SessionEvent(HookEvent evt, SessionInfo session)
+        {
+            if (session == null) return;
+
+            var user = _userManager.GetUserById(session.UserId);
+            await ExecuteWebhook(new EventInfo
+            {
+                Event = evt,
+                User = user,
+                Session = new SessionInfoDto(session),
+                Server = new ServerInfoDto
+                {
+                    Id = _appHost.SystemId,
+                    Name = _appHost.FriendlyName,
+                    Version = _appHost.ApplicationVersion.ToString(),
+                },
+            });
+        }
+
+        private async Task LibraryEvent(HookEvent evt, BaseItem item, ItemUpdateType updateReason)
+        {
+            if (item == null) return;
+            if (item.IsVirtualItem) return;
+
+            await ExecuteWebhook(new EventInfo
+            {
+                Event = evt,
+                Item = item,
+                AdditionalData = updateReason,
+                Server = new ServerInfoDto
+                {
+                    Id = _appHost.SystemId,
+                    Name = _appHost.FriendlyName,
+                    Version = _appHost.ApplicationVersion.ToString(),
+                },
+            });
         }
 
         private async Task PlaybackEvent(HookEvent evt, BaseItem item, SessionInfo session, User user)

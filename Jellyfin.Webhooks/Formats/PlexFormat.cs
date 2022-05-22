@@ -20,42 +20,62 @@ namespace Jellyfin.Webhooks.Formats
 
         public async Task Format(Uri url, EventInfo info)
         {
+            var eventName = GetEventName(info.Event);
+            if (eventName == "unknown")
+            {
+                // Don't know how to handle such events
+                return;
+            }
+
             var body = new PlexFormatPayload
             {
-                @event = GetEventName(info.Event),
+                @event = eventName,
                 user = true,
-                owner = info.User.HasPermission(Data.Enums.PermissionKind.IsAdministrator),
-                Account = new
-                {
-                    id = info.User.Id,
-                    title = info.User.Username
-                },
                 Server = new
                 {
                     title = info.Server.Name,
                     uuid = info.Server.Id
                 },
-                Player = new
+            };
+            if (info.User != null)
+            {
+                body.owner = info.User.HasPermission(Data.Enums.PermissionKind.IsAdministrator);
+                body.Account = new
+                {
+                    id = info.User.Id,
+                    title = info.User.Username
+                };
+            }
+            if (info.Session != null)
+            {
+                body.Player = new
                 {
                     local = true,
                     publicAddress = info.Session?.RemoteEndPoint,
                     title = info.Session?.DeviceName,
                     uuid = info.Session?.Id,
-                },
-                Metadata = new
+                };
+            }
+            if (info.Item != null)
+            {
+                if (info.Item.DateModified.Year == 1)
+                {
+                    info.Item.DateModified = info.Item.DateCreated;
+                }
+                body.Metadata = new
                 {
                     librarySectionType = GetSectionType(info.Item),
                     guid = GetGuid(info.Item),
                     title = info.Item.Name,
                     type = GetMediaType(info.Item),
-                    parentTitle = info.Item.DisplayParent.Name,
-                    grandparentTitle = info.Item.DisplayParent.DisplayParent.Name,
+                    parentTitle = info.Item.DisplayParent?.Name,
+                    grandparentTitle = info.Item.DisplayParent?.DisplayParent?.Name,
                     addedAt = ((DateTimeOffset)info.Item.DateCreated).ToUnixTimeSeconds(),
                     updatedAt = ((DateTimeOffset)info.Item.DateModified).ToUnixTimeSeconds(),
                     year = info.Item.ProductionYear,
                     duration = info.Item.RunTimeTicks / 1000,
-                }
-            };
+                };
+            }
             var content = JsonSerializer.Serialize(body, JsonDefaults.Options);
             var form = new MultipartFormDataContent
             {
@@ -77,7 +97,9 @@ namespace Jellyfin.Webhooks.Formats
             HookEvent.Scrobble => "media.scrobble",
             HookEvent.Rate => "media.rate",
             HookEvent.MarkPlayed => "media.scrobble",
-            _ => "media.play",
+            HookEvent.Play => "media.play",
+            HookEvent.ItemAdded => "library.new",
+            _ => "unknown"
         };
 
         private static string GetGuid(BaseItem item)

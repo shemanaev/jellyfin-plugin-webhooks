@@ -27,15 +27,16 @@ namespace Jellyfin.Webhooks.Formats
 
         public async Task Format(Uri url, EventInfo info)
         {
-            var item = _dto.GetBaseItemDto(info.Item, new DtoOptions(true), info.User);
-            var user = _users.GetUserDto(info.User);
+            var item = info.Item == null ? null : _dto.GetBaseItemDto(info.Item, new DtoOptions(true), info.User);
+            var user = info.User == null ? null : _users.GetUserDto(info.User);
             var body = new DefaultFormatPayload
             {
                 Event = info.Event,
                 Item = item,
                 Session = info.Session,
                 User = user,
-                Server = info.Server
+                Server = info.Server,
+                AdditionalData = info.AdditionalData,
             };
 
             var content = new StringContent(JsonSerializer.Serialize(body, JsonDefaults.Options), Encoding.UTF8, "application/json");
@@ -50,5 +51,6 @@ namespace Jellyfin.Webhooks.Formats
         public UserDto User { get; set; }
         public SessionInfoDto Session { get; set; }
         public ServerInfoDto Server { get; set; }
+        public object AdditionalData { get; set; }
     }
 }

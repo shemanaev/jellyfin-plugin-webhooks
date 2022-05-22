@@ -12,5 +12,6 @@ namespace Jellyfin.Webhooks
         public BaseItem Item { get; set; }
         public SessionInfoDto Session { get; set; }
         public ServerInfoDto Server { get; set; }
+        public object AdditionalData { get; set; }
     }
 }

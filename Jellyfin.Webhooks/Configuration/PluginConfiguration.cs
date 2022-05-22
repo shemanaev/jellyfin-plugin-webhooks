@@ -21,6 +21,20 @@ namespace Jellyfin.Webhooks.Configuration
         MarkPlayed,
         MarkUnplayed,
         Rate,
+
+        ItemAdded,
+        ItemRemoved,
+        ItemUpdated,
+
+        AuthenticationSucceeded,
+        AuthenticationFailed,
+
+        SessionStarted,
+        SessionEnded,
+
+        SubtitleDownloadFailure,
+
+        HasPendingRestartChanged,
     }
 
     public class HookConfig
