@@ -105,27 +105,27 @@ namespace Jellyfin.Webhooks
 
         private async void OnPlaybackStart(object sender, PlaybackProgressEventArgs e)
         {
-            await PlaybackEvent(HookEvent.Play, e.Item, e.Session, e.Users);
             SetDeviceState(e.DeviceId, DeviceState.Playing);
+            await PlaybackEvent(HookEvent.Play, e.Item, e.Session, e.Users);
         }
 
         private async void OnPlaybackStopped(object sender, PlaybackStopEventArgs e)
         {
-            await PlaybackEvent(HookEvent.Stop, e.Item, e.Session, e.Users);
             SetDeviceState(e.DeviceId, DeviceState.Stopped);
+            await PlaybackEvent(HookEvent.Stop, e.Item, e.Session, e.Users);
         }
 
         private async void OnPlaybackProgress(object sender, PlaybackProgressEventArgs e)
         {
             if (e.IsPaused && GetDeviceState(e.DeviceId) != DeviceState.Paused && GetDeviceState(e.DeviceId) != DeviceState.Stopped)
             {
-                await PlaybackEvent(HookEvent.Pause, e.Item, e.Session, e.Users);
                 SetDeviceState(e.DeviceId, DeviceState.Paused);
+                await PlaybackEvent(HookEvent.Pause, e.Item, e.Session, e.Users);
             }
             else if (e.IsPaused == false && GetDeviceState(e.DeviceId) == DeviceState.Paused)
             {
-                await PlaybackEvent(HookEvent.Resume, e.Item, e.Session, e.Users);
                 SetDeviceState(e.DeviceId, DeviceState.Playing);
+                await PlaybackEvent(HookEvent.Resume, e.Item, e.Session, e.Users);
             }
             else
             {
@@ -139,8 +139,8 @@ namespace Jellyfin.Webhooks
                 float percentageWatched = (float)e.Session.PlayState.PositionTicks / (float)e.Session.NowPlayingItem.RunTimeTicks * 100f;
                 if (percentageWatched >= 90 && !_scrobbled.Contains(id))
                 {
-                    await PlaybackEvent(HookEvent.Scrobble, e.Item, e.Session, e.Users);
                     _scrobbled.Add(id);
+                    await PlaybackEvent(HookEvent.Scrobble, e.Item, e.Session, e.Users);
                 }
             }
         }
@@ -226,7 +226,6 @@ namespace Jellyfin.Webhooks
 
         private async void OnSubtitleDownloadFailure(object sender, SubtitleDownloadFailureEventArgs e)
         {
-
             await ExecuteWebhook(new EventInfo
             {
                 Event = HookEvent.SubtitleDownloadFailure,
