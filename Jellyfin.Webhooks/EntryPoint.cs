@@ -258,7 +258,12 @@ namespace Jellyfin.Webhooks
         {
             if (session == null) return;
 
-            var user = _userManager.GetUserById(session.UserId);
+            User user = null;
+            if (session.UserId != Guid.Empty)
+            {
+                user = _userManager.GetUserById(session.UserId);
+            }
+
             await ExecuteWebhook(new EventInfo
             {
                 Event = evt,
