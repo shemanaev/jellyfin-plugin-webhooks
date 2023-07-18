@@ -9,6 +9,7 @@ using Jellyfin.Extensions.Json;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
+using MediaBrowser.Controller.Entities.TV;
 
 namespace Jellyfin.Webhooks.Formats
 {
@@ -27,6 +28,7 @@ namespace Jellyfin.Webhooks.Formats
 
         public async Task Format(Uri url, EventInfo info)
         {
+            var series = info.Item != null && info.Item is Episode ? _dto.GetBaseItemDto((info.Item as Episode).Series, new DtoOptions(true), info.User) : null;
             var item = info.Item == null ? null : _dto.GetBaseItemDto(info.Item, new DtoOptions(true), info.User);
             var user = info.User == null ? null : _users.GetUserDto(info.User);
             var body = new DefaultFormatPayload
@@ -37,6 +39,7 @@ namespace Jellyfin.Webhooks.Formats
                 User = user,
                 Server = info.Server,
                 AdditionalData = info.AdditionalData,
+                Series = series,
             };
 
             var content = new StringContent(JsonSerializer.Serialize(body, JsonDefaults.Options), Encoding.UTF8, "application/json");
@@ -52,5 +55,6 @@ namespace Jellyfin.Webhooks.Formats
         public SessionInfoDto Session { get; set; }
         public ServerInfoDto Server { get; set; }
         public object AdditionalData { get; set; }
+        public BaseItemDto Series { get; set; }
     }
 }
