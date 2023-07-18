@@ -1,4 +1,5 @@
 using MediaBrowser.Controller.Session;
+using MediaBrowser.Model.Session;
 
 namespace Jellyfin.Webhooks.Dto
 {
@@ -10,6 +11,7 @@ namespace Jellyfin.Webhooks.Dto
         public string DeviceName { get; set; }
         public string RemoteEndPoint { get; set; }
         public string ApplicationVersion { get; set; }
+        public PlayerStateInfo PlayState { get; set; }
 
         public SessionInfoDto(SessionInfo session)
         {
@@ -19,6 +21,7 @@ namespace Jellyfin.Webhooks.Dto
             DeviceName = session.DeviceName;
             RemoteEndPoint = session.RemoteEndPoint;
             ApplicationVersion = session.ApplicationVersion;
+            PlayState = session.PlayState;
         }
     }
 }
