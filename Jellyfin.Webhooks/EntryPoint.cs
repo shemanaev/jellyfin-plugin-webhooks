@@ -223,7 +223,14 @@ namespace Jellyfin.Webhooks
 
         private async void OnSessionEnded(object sender, SessionEventArgs e)
         {
+            if (GetDeviceState(e.SessionInfo.DeviceId) != DeviceState.Stopped)
+            {
+                var user = _userManager.GetUserById(e.SessionInfo.UserId);
+                await PlaybackEvent(HookEvent.Stop, e.SessionInfo.FullNowPlayingItem, e.SessionInfo, user);
+            }
+
             await SessionEvent(HookEvent.SessionEnded, e.SessionInfo);
+            ClearDeviceState(e.SessionInfo.DeviceId);
         }
 
         private async void OnSubtitleDownloadFailure(object sender, SubtitleDownloadFailureEventArgs e)
@@ -365,6 +372,11 @@ namespace Jellyfin.Webhooks
         private void SetDeviceState(string id, DeviceState state)
         {
             _deviceStates[id] = state;
+        }
+
+        private void ClearDeviceState(string id)
+        {
+            _deviceStates.Remove(id);
         }
     }
 
