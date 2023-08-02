@@ -17,6 +17,7 @@ namespace Jellyfin.Webhooks.Configuration
         Resume,
         Stop,
         Scrobble, // 90 percents
+        Progress,
 
         MarkPlayed,
         MarkUnplayed,

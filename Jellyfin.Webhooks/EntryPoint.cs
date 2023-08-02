@@ -129,6 +129,8 @@ namespace Jellyfin.Webhooks
             }
             else
             {
+                await PlaybackEvent(HookEvent.Progress, e.Item, e.Session, e.Users);
+
                 // don't scrobble virtual items
                 if (e.MediaInfo.Path == null
                     || !e.MediaInfo.LocationType.HasValue || e.MediaInfo.LocationType == LocationType.Virtual
