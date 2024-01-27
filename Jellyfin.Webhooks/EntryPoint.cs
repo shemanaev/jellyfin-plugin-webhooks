@@ -343,7 +343,7 @@ namespace Jellyfin.Webhooks
                 .Where(h => h.Events.Contains(request.Event));
             foreach (var hook in hooks)
             {
-                if (!string.IsNullOrEmpty(hook.UserId) && request.User.Id.ToString("N") != hook.UserId)
+                if (!string.IsNullOrEmpty(hook.UserId) && request.User?.Id.ToString("N") != hook.UserId)
                     continue;
 
                 var formatter = _formatFactory.CreateFormat(hook.Format);
