@@ -2,7 +2,7 @@ name: Build Plugin
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, "dev/**" ]
     paths-ignore:
       - '**/*.md'
   pull_request:

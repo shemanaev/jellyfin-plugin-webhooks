@@ -105,12 +105,14 @@ namespace Jellyfin.Webhooks
 
         private async void OnPlaybackStart(object sender, PlaybackProgressEventArgs e)
         {
+            _logger.LogInformation("OnPlaybackStart");
             SetDeviceState(e.DeviceId, DeviceState.Playing);
             await PlaybackEvent(HookEvent.Play, e.Item, e.Session, e.Users);
         }
 
         private async void OnPlaybackStopped(object sender, PlaybackStopEventArgs e)
         {
+            _logger.LogInformation("OnPlaybackStopped");
             SetDeviceState(e.DeviceId, DeviceState.Stopped);
             await PlaybackEvent(HookEvent.Stop, e.Item, e.Session, e.Users);
         }
@@ -165,27 +167,32 @@ namespace Jellyfin.Webhooks
                     return;
             }
 
+            _logger.LogInformation("OnUserDataSaved");
             var user = _userManager.GetUserById(e.UserId);
             await PlaybackEvent(evt, e.Item, null, user);
         }
 
         private async void OnItemAdded(object sender, ItemChangeEventArgs e)
         {
+            _logger.LogInformation("OnItemAdded");
             await LibraryEvent(HookEvent.ItemAdded, e.Item, e.UpdateReason);
         }
 
         private async void OnItemRemoved(object sender, ItemChangeEventArgs e)
         {
+            _logger.LogInformation("OnItemRemoved");
             await LibraryEvent(HookEvent.ItemRemoved, e.Item, e.UpdateReason);
         }
 
         private async void OnItemUpdated(object sender, ItemChangeEventArgs e)
         {
+            _logger.LogInformation("OnItemUpdated");
             await LibraryEvent(HookEvent.ItemUpdated, e.Item, e.UpdateReason);
         }
 
         private async void OnAuthenticationSucceeded(object sender, GenericEventArgs<AuthenticationResult> e)
         {
+            _logger.LogInformation("OnAuthenticationSucceeded");
             var user = _userManager.GetUserById(e.Argument.User.Id);
             await ExecuteWebhook(new EventInfo
             {
@@ -203,6 +210,7 @@ namespace Jellyfin.Webhooks
 
         private async void OnAuthenticationFailed(object sender, GenericEventArgs<AuthenticationRequest> e)
         {
+            _logger.LogInformation("OnAuthenticationFailed");
             await ExecuteWebhook(new EventInfo
             {
                 Event = HookEvent.AuthenticationFailed,
@@ -218,11 +226,13 @@ namespace Jellyfin.Webhooks
 
         private async void OnSessionStarted(object sender, SessionEventArgs e)
         {
+            _logger.LogInformation("OnSessionStarted");
             await SessionEvent(HookEvent.SessionStarted, e.SessionInfo);
         }
 
         private async void OnSessionEnded(object sender, SessionEventArgs e)
         {
+            _logger.LogInformation("OnSessionEnded");
             if (GetDeviceState(e.SessionInfo.DeviceId) != DeviceState.Stopped)
             {
                 var user = _userManager.GetUserById(e.SessionInfo.UserId);
@@ -235,6 +245,7 @@ namespace Jellyfin.Webhooks
 
         private async void OnSubtitleDownloadFailure(object sender, SubtitleDownloadFailureEventArgs e)
         {
+            _logger.LogInformation("OnSubtitleDownloadFailure");
             await ExecuteWebhook(new EventInfo
             {
                 Event = HookEvent.SubtitleDownloadFailure,
@@ -251,6 +262,7 @@ namespace Jellyfin.Webhooks
 
         private async void HasPendingRestartChanged(object sender, EventArgs e)
         {
+            _logger.LogInformation("HasPendingRestartChanged");
             await ExecuteWebhook(new EventInfo
             {
                 Event = HookEvent.HasPendingRestartChanged,
@@ -273,6 +285,7 @@ namespace Jellyfin.Webhooks
                 user = _userManager.GetUserById(session.UserId);
             }
 
+            _logger.LogInformation("SessionEvent");
             await ExecuteWebhook(new EventInfo
             {
                 Event = evt,
@@ -292,6 +305,7 @@ namespace Jellyfin.Webhooks
             if (item == null) return;
             if (item.IsVirtualItem) return;
 
+            _logger.LogInformation("LibraryEvent");
             await ExecuteWebhook(new EventInfo
             {
                 Event = evt,
@@ -311,6 +325,7 @@ namespace Jellyfin.Webhooks
             if (user == null) return;
             if (item == null) return;
 
+            _logger.LogInformation("PlaybackEvent");
             await ExecuteWebhook(new EventInfo
             {
                 Event = evt,
@@ -349,6 +364,7 @@ namespace Jellyfin.Webhooks
                 var formatter = _formatFactory.CreateFormat(hook.Format);
                 try
                 {
+                    _logger.LogInformation("ExecuteWebhook: {id}", hook.Id);
                     await formatter.Format(new Uri(hook.Url), request);
                 }
                 catch (Exception e)
