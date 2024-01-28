@@ -56,7 +56,7 @@ namespace Jellyfin.Webhooks
 
             _scrobbled = new List<Guid>();
             _deviceStates = new Dictionary<string, DeviceState>();
-            _formatFactory = new FormatFactory(httpClientFactory, dtoService, _userManager);
+            _formatFactory = new FormatFactory(httpClientFactory, dtoService, _userManager, logger);
         }
 
         public void Dispose()
@@ -364,7 +364,7 @@ namespace Jellyfin.Webhooks
                 var formatter = _formatFactory.CreateFormat(hook.Format);
                 try
                 {
-                    _logger.LogInformation("ExecuteWebhook: {id}", hook.Id);
+                    _logger.LogInformation("ExecuteWebhook: {id}, format: {format}, url: {url}", hook.Id, hook.Format, hook.Url);
                     await formatter.Format(new Uri(hook.Url), request);
                 }
                 catch (Exception e)

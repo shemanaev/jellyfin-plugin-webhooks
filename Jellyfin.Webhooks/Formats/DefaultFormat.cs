@@ -10,6 +10,7 @@ using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Controller.Entities.TV;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Webhooks.Formats
 {
@@ -18,12 +19,14 @@ namespace Jellyfin.Webhooks.Formats
         private readonly HttpClient _http;
         private readonly IDtoService _dto;
         private readonly IUserManager _users;
+        private readonly ILogger _logger;
 
-        public DefaultFormat(HttpClient http, IDtoService dto, IUserManager users)
+        public DefaultFormat(HttpClient http, IDtoService dto, IUserManager users, ILogger logger)
         {
             _http = http;
             _dto = dto;
             _users = users;
+            _logger = logger;
         }
 
         public async Task Format(Uri url, EventInfo info)
@@ -42,8 +45,11 @@ namespace Jellyfin.Webhooks.Formats
                 Series = series,
             };
 
-            var content = new StringContent(JsonSerializer.Serialize(body, JsonDefaults.Options), Encoding.UTF8, "application/json");
-            await _http.PostAsync(url, content);
+            var contentJson = JsonSerializer.Serialize(body, JsonDefaults.Options);
+            var content = new StringContent(contentJson, Encoding.UTF8, "application/json");
+            _logger.LogInformation("Calling url: {url} (size: {size})", url, contentJson.Length);
+            var response = await _http.PostAsync(url, content);
+            _logger.LogInformation($"Response: {response}");
         }
     }
 
