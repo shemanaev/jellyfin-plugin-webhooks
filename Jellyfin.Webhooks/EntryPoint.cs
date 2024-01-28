@@ -361,7 +361,7 @@ namespace Jellyfin.Webhooks
 
             foreach (var hook in hooks)
             {
-                if (!string.IsNullOrEmpty(hook.UserId) && request.User?.Id.ToString("N") != hook.UserId)
+                if (request.User != null && !string.IsNullOrEmpty(hook.UserId) && request.User?.Id.ToString("N") != hook.UserId)
                 {
                     _logger.LogWarning("ExecuteWebhook: user mismatch, hook.UserId: {hookUserId}, request.User: {reqUser}, event: {evt}", hook.UserId, request.User, request.Event);
                     continue;
