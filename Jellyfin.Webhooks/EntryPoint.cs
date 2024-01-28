@@ -356,15 +356,21 @@ namespace Jellyfin.Webhooks
         {
             var hooks = Plugin.Instance.Configuration.Hooks
                 .Where(h => h.Events.Contains(request.Event));
+
+            _logger.LogInformation("ExecuteWebhook: hooks {hooks}, event: {evt}", hooks.Count(), request.Event);
+
             foreach (var hook in hooks)
             {
                 if (!string.IsNullOrEmpty(hook.UserId) && request.User?.Id.ToString("N") != hook.UserId)
+                {
+                    _logger.LogWarning("ExecuteWebhook: user mismatch, hook.UserId: {hookUserId}, request.User: {reqUser}, event: {evt}", hook.UserId, request.User, request.Event);
                     continue;
+                }
 
                 var formatter = _formatFactory.CreateFormat(hook.Format);
                 try
                 {
-                    _logger.LogInformation("ExecuteWebhook: {id}, format: {format}, url: {url}", hook.Id, hook.Format, hook.Url);
+                    _logger.LogInformation("ExecuteWebhook: {id}, format: {format}, url: {url}, event: {evt}", hook.Id, hook.Format, hook.Url, request.Event);
                     await formatter.Format(new Uri(hook.Url), request);
                 }
                 catch (Exception e)

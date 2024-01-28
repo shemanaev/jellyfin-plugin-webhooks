@@ -47,9 +47,9 @@ namespace Jellyfin.Webhooks.Formats
 
             var contentJson = JsonSerializer.Serialize(body, JsonDefaults.Options);
             var content = new StringContent(contentJson, Encoding.UTF8, "application/json");
-            _logger.LogInformation("Calling url: {url} (size: {size})", url, contentJson.Length);
+            _logger.LogInformation("Calling url: {url} (size: {size}), event: {evt}", url, contentJson.Length, info.Event);
             var response = await _http.PostAsync(url, content);
-            _logger.LogInformation($"Response: {response}");
+            _logger.LogInformation("event: {evt}, Response: {response}", info.Event, response);
         }
     }
 
