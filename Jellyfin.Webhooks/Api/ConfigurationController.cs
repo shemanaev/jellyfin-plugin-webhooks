@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Mime;
 using Jellyfin.Webhooks.Configuration;
+using MediaBrowser.Common.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Jellyfin.Webhooks.Api
 {
     [ApiController]
-    [Authorize(Policy = "RequiresElevation")]
+    [Authorize(Policy = Policies.RequiresElevation)]
     [Route("Webhooks")]
     [Produces(MediaTypeNames.Application.Json)]
     public class ConfigurationController : ControllerBase

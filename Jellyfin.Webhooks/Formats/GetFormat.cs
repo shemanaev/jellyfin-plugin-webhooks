@@ -26,7 +26,7 @@ namespace Jellyfin.Webhooks.Formats
             }
             if (info.Item != null)
             {
-                query["media_type"] = info.Item.MediaType;
+                query["media_type"] = info.Item.MediaType.ToString();
             }
             builder.Query = query.ToString();
 
