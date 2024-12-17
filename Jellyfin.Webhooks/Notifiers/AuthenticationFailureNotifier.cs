@@ -1,21 +1,20 @@
 using System.Threading.Tasks;
-using Jellyfin.Data.Events;
 using MediaBrowser.Controller.Events;
-using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
+using MediaBrowser.Controller.Events.Authentication;
 
 namespace Jellyfin.Webhooks.Notifiers;
 
 public class AuthenticationFailureNotifier(
     IServerApplicationHost applicationHost,
     ISender sender
-) : IEventConsumer<GenericEventArgs<AuthenticationRequest>>
+) : IEventConsumer<AuthenticationRequestEventArgs>
 {
-    public async Task OnEvent(GenericEventArgs<AuthenticationRequest> eventArgs)
+    public async Task OnEvent(AuthenticationRequestEventArgs eventArgs)
     {
-        if (eventArgs.Argument is null)
+        if (eventArgs is null)
         {
             return;
         }
@@ -23,7 +22,7 @@ public class AuthenticationFailureNotifier(
         await sender.Send(new EventInfo
         {
             Event = HookEvent.AuthenticationFailed,
-            AdditionalData = eventArgs.Argument,
+            AdditionalData = eventArgs,
             Server = new ServerInfoDto
             {
                 Id = applicationHost.SystemId,

@@ -1,11 +1,10 @@
 using System.Threading.Tasks;
-using Jellyfin.Data.Events;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
 using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.Authentication;
+using MediaBrowser.Controller.Events.Authentication;
 
 namespace Jellyfin.Webhooks.Notifiers;
 
@@ -13,20 +12,20 @@ public class AuthenticationSuccessNotifier(
     IServerApplicationHost applicationHost,
     IUserManager userManager,
     ISender sender
-) : IEventConsumer<GenericEventArgs<AuthenticationResult>>
+) : IEventConsumer<AuthenticationResultEventArgs>
 {
-    public async Task OnEvent(GenericEventArgs<AuthenticationResult> eventArgs)
+    public async Task OnEvent(AuthenticationResultEventArgs eventArgs)
     {
-        if (eventArgs.Argument is null)
+        if (eventArgs is null)
         {
             return;
         }
 
-        var user = userManager.GetUserById(eventArgs.Argument.User.Id);
+        var user = userManager.GetUserById(eventArgs.User.Id);
         await sender.Send(new EventInfo
         {
             Event = HookEvent.AuthenticationSucceeded,
-            Session = new SessionInfoDto(eventArgs.Argument.SessionInfo),
+            Session = new SessionInfoDto(eventArgs.SessionInfo),
             User = user,
             Server = new ServerInfoDto
             {

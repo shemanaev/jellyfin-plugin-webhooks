@@ -52,7 +52,7 @@ namespace Jellyfin.Webhooks.Formats
         public HookEvent Event { get; set; }
         public BaseItemDto Item { get; set; }
         public UserDto User { get; set; }
-        public SessionInfoDto Session { get; set; }
+        public Dto.SessionInfoDto Session { get; set; }
         public ServerInfoDto Server { get; set; }
         public object AdditionalData { get; set; }
         public BaseItemDto Series { get; set; }

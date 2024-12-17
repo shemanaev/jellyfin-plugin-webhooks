@@ -13,6 +13,17 @@ namespace Jellyfin.Webhooks.Dto
         public string ApplicationVersion { get; set; }
         public PlayerStateInfo PlayState { get; set; }
 
+        public SessionInfoDto(MediaBrowser.Model.Dto.SessionInfoDto session)
+        {
+            Id = session.Id;
+            Client = session.Client;
+            DeviceId = session.DeviceId;
+            DeviceName = session.DeviceName;
+            RemoteEndPoint = session.RemoteEndPoint;
+            ApplicationVersion = session.ApplicationVersion;
+            PlayState = session.PlayState;
+        }
+
         public SessionInfoDto(SessionInfo session)
         {
             Id = session.Id;

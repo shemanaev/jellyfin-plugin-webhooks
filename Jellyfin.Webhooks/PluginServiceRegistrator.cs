@@ -1,11 +1,9 @@
-using Jellyfin.Data.Events;
-using MediaBrowser.Controller.Authentication;
 using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
-using MediaBrowser.Controller.Session;
 using Microsoft.Extensions.DependencyInjection;
 using Jellyfin.Webhooks.Notifiers;
+using MediaBrowser.Controller.Events.Authentication;
 
 namespace Jellyfin.Webhooks;
 
@@ -17,7 +15,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddScoped<ISender, Sender>();
 
         // Security consumers.
-        serviceCollection.AddScoped<IEventConsumer<GenericEventArgs<AuthenticationRequest>>, AuthenticationFailureNotifier>();
-        serviceCollection.AddScoped<IEventConsumer<GenericEventArgs<AuthenticationResult>>, AuthenticationSuccessNotifier>();
+        serviceCollection.AddScoped<IEventConsumer<AuthenticationRequestEventArgs>, AuthenticationFailureNotifier>();
+        serviceCollection.AddScoped<IEventConsumer<AuthenticationResultEventArgs>, AuthenticationSuccessNotifier>();
     }
 }
