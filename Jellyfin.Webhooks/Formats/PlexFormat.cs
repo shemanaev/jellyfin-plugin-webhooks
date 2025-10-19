@@ -3,6 +3,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
+using Jellyfin.Data;
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Extensions.Json;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Audio;
@@ -39,7 +41,7 @@ namespace Jellyfin.Webhooks.Formats
             };
             if (info.User != null)
             {
-                body.owner = info.User.HasPermission(Data.Enums.PermissionKind.IsAdministrator);
+                body.owner = info.User.HasPermission(PermissionKind.IsAdministrator);
                 body.Account = new
                 {
                     id = info.User.Id,

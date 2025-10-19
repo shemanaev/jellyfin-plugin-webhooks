@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Data.Entities;
+using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
 using MediaBrowser.Controller;
