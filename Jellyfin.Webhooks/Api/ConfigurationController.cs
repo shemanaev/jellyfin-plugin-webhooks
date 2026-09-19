@@ -52,6 +52,7 @@ namespace Jellyfin.Webhooks.Api
         {
             var plugin = Plugin.Instance;
             var hooks = plugin.Configuration.Hooks.ToList();
+            hook.Name = hook.Name?.Trim();
 
             if (string.IsNullOrWhiteSpace(hook.Id))
             {

@@ -34,24 +34,32 @@ function onEditWebhookClick() {
     return false;
 }
 
-function getEventsHtml(hook) {
-    let result = '';
-    result += hook.Events.join(', ');
-    return result;
+export function escapeHtml(value) {
+    return (value == null ? '' : String(value)).replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    })[character]);
 }
 
-function getHookHtml(hook) {
+export function getHookHtml(hook) {
+    const name = (hook.Name || '').trim();
+    const url = hook.Url || '';
+    const events = (hook.Events || []).join(', ');
+    const title = name || url;
+    const details = name ? url : events;
+    const metadata = name ? hook.Format + ' · ' + events : hook.Format;
     let result = '';
     result += '<div class="listItem listItem-border">';
-    result += '<div class="listItemBody three-line" data-hookid="' + hook.Id + '">';
-    result += '<div class="listItemBodyText">' + hook.Url + '</div>';
-    result += '<div class="listItemBodyText secondary">';
-    result += getEventsHtml(hook);
-    result += '</div>'; // secondary
-    result += '<div class="listItemBodyText secondary">' + hook.Format + '</div>';
+    result += '<div class="listItemBody three-line" data-hookid="' + escapeHtml(hook.Id) + '">';
+    result += '<div class="listItemBodyText">' + escapeHtml(title) + '</div>';
+    result += '<div class="listItemBodyText secondary">' + escapeHtml(details) + '</div>';
+    result += '<div class="listItemBodyText secondary">' + escapeHtml(metadata) + '</div>';
     result += '</div>'; // listItemBody
     result += '<button type="button" is="paper-icon-button-light" class="btn-webhook-delete paper-icon-button-light"';
-    result += ' data-hookid="' + hook.Id + '" title="' + 'Delete' + '">';
+    result += ' data-hookid="' + escapeHtml(hook.Id) + '" title="' + 'Delete' + '">';
     result += '<span class="material-icons delete"></span></button>';
     result += '</div>'; // listItem
     return result;

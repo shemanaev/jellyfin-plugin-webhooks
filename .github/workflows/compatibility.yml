@@ -25,6 +25,8 @@ jobs:
         run: |-
           ./eng/generate-jellyfin-props.ps1
           git diff --exit-code -- Directory.JellyfinProfiles.props
+      - name: Test web configuration UI
+        run: node ./eng/test-web-ui.mjs
       - name: Build compatibility artifact
         shell: pwsh
         run: ./eng/build-plugin.ps1 -Profile '${{ matrix.jellyfin-profile }}'

@@ -1,15 +1,40 @@
 
 const pluginUniqueId = 'd8ca599b-ab3c-41b0-a4ea-6de1d52b9996';
 
-function collectData(view) {
+export function collectData(view) {
     const result = {};
     result.Id = view.querySelector('#hook-id').value;
+    result.Name = view.querySelector('#text-name').value.trim();
     result.Url = view.querySelector('#text-url').value;
     result.Format = view.querySelector('#select-format').value;
     result.UserId = view.querySelector('#select-user').value;
     result.Events = Array.from(view.querySelectorAll('.events-container input[data-event]:checked'))
         .map(e => e.getAttribute('data-event'));
     return result;
+}
+
+export function resetEditor(view) {
+    view.querySelector('.form-webhook-editor').reset();
+    view.querySelector('#hook-id').value = '';
+    view.querySelector('#text-name').value = '';
+    view.querySelector('#text-url').value = '';
+    view.querySelectorAll('.events-container input[data-event]')
+        .forEach(input => input.checked = false);
+
+    const format = view.querySelector('#select-format');
+    const user = view.querySelector('#select-user');
+    format.selectedIndex = format.options.length > 0 ? 0 : -1;
+    user.selectedIndex = user.options.length > 0 ? 0 : -1;
+}
+
+export function scrollEditorToTop(view) {
+    view.scrollTop = 0;
+    if (typeof view.scrollTo === 'function') {
+        view.scrollTo(0, 0);
+    }
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo(0, 0);
+    }
 }
 
 function onSubmit(e) {
@@ -67,24 +92,29 @@ function fillOptions(view) {
 
 function loadData(view, id) {
     if (!id) return;
-    Dashboard.showLoadingMsg();
-    ApiClient.getPluginConfiguration(pluginUniqueId).then(config => {
+    return ApiClient.getPluginConfiguration(pluginUniqueId).then(config => {
         const hook = config.Hooks.find(e => e.Id == id);
         if (hook) {
             view.querySelector('#hook-id').value = hook.Id;
+            view.querySelector('#text-name').value = hook.Name || '';
             view.querySelector('#text-url').value = hook.Url;
             view.querySelector('#select-format').value = hook.Format;
             view.querySelector('#select-user').value = hook.UserId;
-            hook.Events.forEach(e => view.querySelector('.events-container input[data-event="' + e + '"]').checked = true);
+            (hook.Events || []).forEach(e => view.querySelector('.events-container input[data-event="' + e + '"]').checked = true);
         }
-        Dashboard.hideLoadingMsg();
     });
 }
 
-function onViewShow(params) {
-    fillOptions(this).then(() =>
-        loadData(this, params.id)
-    );
+async function onViewShow(params) {
+    Dashboard.showLoadingMsg();
+    try {
+        await fillOptions(this);
+        resetEditor(this);
+        await loadData(this, params.id);
+        scrollEditorToTop(this);
+    } finally {
+        Dashboard.hideLoadingMsg();
+    }
 }
 
 export default function (view, params) {

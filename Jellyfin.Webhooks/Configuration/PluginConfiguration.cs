@@ -41,6 +41,7 @@ namespace Jellyfin.Webhooks.Configuration
     public class HookConfig
     {
         public string Id { get; set; }
+        public string Name { get; set; }
         public string Url { get; set; }
         public string UserId { get; set; }
         public HookFormat Format { get; set; }
