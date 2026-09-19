@@ -1,0 +1,41 @@
+{
+  "baseVersion": "3.9.0",
+  "buildProfiles": [
+    {
+      "profile": "10.11.11",
+      "packageVersion": "10.11.11",
+      "targetAbi": "10.11.11.0",
+      "targetFramework": "net9.0",
+      "versionPatchOffset": "101111",
+      "constants": [
+        "JELLYFIN_10_11",
+        "JELLYFIN_USER_IN_DATABASE_ENTITIES"
+      ]
+    },
+    {
+      "profile": "12.0",
+      "packageVersion": "12.0.0",
+      "targetAbi": "12.0.0.0",
+      "targetFramework": "net10.0",
+      "versionPatchOffset": "120000",
+      "constants": [
+        "JELLYFIN_12",
+        "JELLYFIN_USER_IN_DATABASE_ENTITIES"
+      ]
+    }
+  ],
+  "serverProfiles": [
+    {
+      "profile": "10.11.11",
+      "buildProfile": "10.11.11"
+    },
+    {
+      "profile": "12.0",
+      "buildProfile": "12.0"
+    },
+    {
+      "profile": "12.1",
+      "buildProfile": "12.0"
+    }
+  ]
+}

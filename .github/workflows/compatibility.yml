@@ -1,0 +1,33 @@
+name: Compatibility
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jellyfin-profile: [10.11.11, "12.0", "12.1"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+      - name: Verify generated compatibility properties
+        shell: pwsh
+        run: |-
+          ./eng/generate-jellyfin-props.ps1
+          git diff --exit-code -- Directory.JellyfinProfiles.props
+      - name: Build compatibility artifact
+        shell: pwsh
+        run: ./eng/build-plugin.ps1 -Profile '${{ matrix.jellyfin-profile }}'
+      - name: Smoke test plugin loading
+        shell: pwsh
+        run: ./eng/smoke-test-jellyfin-docker.ps1 -Profile '${{ matrix.jellyfin-profile }}' -SkipBuild

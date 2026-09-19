@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
 using MediaBrowser.Controller;
@@ -202,7 +201,7 @@ namespace Jellyfin.Webhooks
         {
             if (session == null) return;
 
-            User user = null;
+            JellyfinUser user = null;
             if (session.UserId != Guid.Empty)
             {
                 user = userManager.GetUserById(session.UserId);
@@ -241,7 +240,7 @@ namespace Jellyfin.Webhooks
             });
         }
 
-        private async Task PlaybackEvent(HookEvent evt, BaseItem item, SessionInfo session, User user)
+        private async Task PlaybackEvent(HookEvent evt, BaseItem item, SessionInfo session, JellyfinUser user)
         {
             if (user == null) return;
             if (item == null) return;
@@ -261,7 +260,7 @@ namespace Jellyfin.Webhooks
             });
         }
 
-        private async Task PlaybackEvent(HookEvent evt, BaseItem item, SessionInfo session, List<User> users)
+        private async Task PlaybackEvent(HookEvent evt, BaseItem item, SessionInfo session, List<JellyfinUser> users)
         {
             if (users.Count <= 0) return;
             if (item == null) return;

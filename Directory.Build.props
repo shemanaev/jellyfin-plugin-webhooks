@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <PluginName Condition="'$(PluginName)' == ''">Webhooks</PluginName>
+    <PluginGuid Condition="'$(PluginGuid)' == ''">eb5d7894-8eef-4b36-aa6f-5d124e828ce1</PluginGuid>
+    <PluginOverview Condition="'$(PluginOverview)' == ''">Webhooks. Flexible and robust</PluginOverview>
+    <PluginDescription Condition="'$(PluginDescription)' == ''">Supports couple of webhook types including Plex one.</PluginDescription>
+    <PluginCategory Condition="'$(PluginCategory)' == ''">General</PluginCategory>
+    <PluginOwner Condition="'$(PluginOwner)' == ''">shemanaev</PluginOwner>
+    <PluginArtifacts Condition="'$(PluginArtifacts)' == ''">Jellyfin.Webhooks.dll</PluginArtifacts>
+    <JellyfinProfile Condition="'$(JellyfinProfile)' == ''">12.1</JellyfinProfile>
+  </PropertyGroup>
+
+  <Import Project="Directory.JellyfinProfiles.props" Condition="Exists('Directory.JellyfinProfiles.props')" />
+
+  <PropertyGroup>
+    <PluginBaseVersion Condition="'$(PluginBaseVersion)' == ''">3.9.0</PluginBaseVersion>
+    <PluginVersion Condition="'$(PluginVersion)' == ''">$(PluginBaseVersion).0</PluginVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">$(PluginBaseVersion).0</AssemblyVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">$(AssemblyVersion)</FileVersion>
+  </PropertyGroup>
+</Project>
