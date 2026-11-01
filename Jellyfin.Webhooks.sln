@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{7E338A21-F88C-4512-A413-3684D417CD9F}") = "Jellyfin.Webhooks", "Jellyfin.Webhooks\Jellyfin.Webhooks.csproj", "{352A697D-2DEF-4AB1-9651-C45C3666FAD8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Webhooks.Tests", "Jellyfin.Webhooks.Tests\Jellyfin.Webhooks.Tests.csproj", "{657629DB-1CF8-423D-8ACD-73143E5F104A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,5 +15,9 @@ Global
 		{352A697D-2DEF-4AB1-9651-C45C3666FAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{352A697D-2DEF-4AB1-9651-C45C3666FAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{352A697D-2DEF-4AB1-9651-C45C3666FAD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{657629DB-1CF8-423D-8ACD-73143E5F104A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{657629DB-1CF8-423D-8ACD-73143E5F104A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{657629DB-1CF8-423D-8ACD-73143E5F104A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{657629DB-1CF8-423D-8ACD-73143E5F104A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

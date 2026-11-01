@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
 using Jellyfin.Webhooks.Dto;
@@ -16,7 +17,7 @@ public class AuthenticationSuccessNotifier(
 {
     public async Task OnEvent(AuthenticationResultEventArgs eventArgs)
     {
-        if (eventArgs is null)
+        if (eventArgs?.User is null || eventArgs.User.Id == Guid.Empty)
         {
             return;
         }
@@ -25,7 +26,7 @@ public class AuthenticationSuccessNotifier(
         await sender.Send(new EventInfo
         {
             Event = HookEvent.AuthenticationSucceeded,
-            Session = new SessionInfoDto(eventArgs.SessionInfo),
+            Session = eventArgs.SessionInfo == null ? null : new SessionInfoDto(eventArgs.SessionInfo),
             User = user,
             Server = new ServerInfoDto
             {

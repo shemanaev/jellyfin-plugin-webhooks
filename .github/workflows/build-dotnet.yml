@@ -58,6 +58,8 @@ jobs:
       - name: Prepare Jellyfin metadata (${{ matrix.jellyfin-profile }})
         shell: pwsh
         run: ./eng/write-build-yaml.ps1 -Profile '${{ matrix.jellyfin-profile }}' -OutputPath build.yaml
+      - name: Test session event handling
+        run: dotnet test Jellyfin.Webhooks.Tests -c Release -p:JellyfinProfile=${{ matrix.jellyfin-profile }}
       - name: Build Jellyfin plugin (${{ matrix.jellyfin-profile }})
         uses: oddstr13/jellyfin-plugin-repository-manager@v1.1.1
         id: jprm

@@ -27,6 +27,8 @@ jobs:
           git diff --exit-code -- Directory.JellyfinProfiles.props
       - name: Test web configuration UI
         run: node ./eng/test-web-ui.mjs
+      - name: Test session event handling
+        run: dotnet test Jellyfin.Webhooks.Tests -c Release -p:JellyfinProfile=${{ matrix.jellyfin-profile }}
       - name: Build compatibility artifact
         shell: pwsh
         run: ./eng/build-plugin.ps1 -Profile '${{ matrix.jellyfin-profile }}'

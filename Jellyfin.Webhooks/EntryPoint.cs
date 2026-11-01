@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Webhooks.Configuration;
@@ -11,6 +12,7 @@ using MediaBrowser.Controller.Session;
 using MediaBrowser.Controller.Subtitles;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Webhooks
 {
@@ -21,7 +23,8 @@ namespace Jellyfin.Webhooks
         ILibraryManager libraryManager,
         ISubtitleManager subtitleManager,
         IServerApplicationHost appHost,
-        ISender _sender
+        ISender _sender,
+        ILogger<EntryPoint> logger
     ) : IHostedService
     {
         private readonly List<Guid> _scrobbled = [];
@@ -69,19 +72,32 @@ namespace Jellyfin.Webhooks
             return Task.CompletedTask;
         }
 
-        private async void OnPlaybackStart(object sender, PlaybackProgressEventArgs e)
+        private async Task HandleEventAsync(Func<Task> action, [CallerMemberName] string eventName = null)
+        {
+            try
+            {
+                await action();
+            }
+            catch (Exception exception)
+            {
+                // Exceptions escaping an async-void event handler can terminate the server.
+                logger.LogError(exception, "Error handling webhook event {EventName}", eventName);
+            }
+        }
+
+        private async void OnPlaybackStart(object sender, PlaybackProgressEventArgs e) => await HandleEventAsync(async () =>
         {
             SetDeviceState(e.DeviceId, DeviceState.Playing);
             await PlaybackEvent(HookEvent.Play, e.Item, e.Session, e.Users);
-        }
+        });
 
-        private async void OnPlaybackStopped(object sender, PlaybackStopEventArgs e)
+        private async void OnPlaybackStopped(object sender, PlaybackStopEventArgs e) => await HandleEventAsync(async () =>
         {
             SetDeviceState(e.DeviceId, DeviceState.Stopped);
             await PlaybackEvent(HookEvent.Stop, e.Item, e.Session, e.Users);
-        }
+        });
 
-        private async void OnPlaybackProgress(object sender, PlaybackProgressEventArgs e)
+        private async void OnPlaybackProgress(object sender, PlaybackProgressEventArgs e) => await HandleEventAsync(async () =>
         {
             if (e.IsPaused && GetDeviceState(e.DeviceId) != DeviceState.Paused && GetDeviceState(e.DeviceId) != DeviceState.Stopped)
             {
@@ -111,10 +127,12 @@ namespace Jellyfin.Webhooks
                     await PlaybackEvent(HookEvent.Scrobble, e.Item, e.Session, e.Users);
                 }
             }
-        }
+        });
 
-        private async void OnUserDataSaved(object sender, UserDataSaveEventArgs e)
+        private async void OnUserDataSaved(object sender, UserDataSaveEventArgs e) => await HandleEventAsync(async () =>
         {
+            if (e.UserId == Guid.Empty) return;
+
             HookEvent evt;
 
             switch (e.SaveReason)
@@ -133,41 +151,50 @@ namespace Jellyfin.Webhooks
 
             var user = userManager.GetUserById(e.UserId);
             await PlaybackEvent(evt, e.Item, null, user);
-        }
+        });
 
-        private async void OnItemAdded(object sender, ItemChangeEventArgs e)
+        private async void OnItemAdded(object sender, ItemChangeEventArgs e) => await HandleEventAsync(async () =>
         {
             await LibraryEvent(HookEvent.ItemAdded, e.Item, e.UpdateReason);
-        }
+        });
 
-        private async void OnItemRemoved(object sender, ItemChangeEventArgs e)
+        private async void OnItemRemoved(object sender, ItemChangeEventArgs e) => await HandleEventAsync(async () =>
         {
             await LibraryEvent(HookEvent.ItemRemoved, e.Item, e.UpdateReason);
-        }
+        });
 
-        private async void OnItemUpdated(object sender, ItemChangeEventArgs e)
+        private async void OnItemUpdated(object sender, ItemChangeEventArgs e) => await HandleEventAsync(async () =>
         {
             await LibraryEvent(HookEvent.ItemUpdated, e.Item, e.UpdateReason);
-        }
+        });
 
-        private async void OnSessionStarted(object sender, SessionEventArgs e)
+        private async void OnSessionStarted(object sender, SessionEventArgs e) => await HandleEventAsync(async () =>
         {
             await SessionEvent(HookEvent.SessionStarted, e.SessionInfo);
-        }
+        });
 
-        private async void OnSessionEnded(object sender, SessionEventArgs e)
+        private async void OnSessionEnded(object sender, SessionEventArgs e) => await HandleEventAsync(async () =>
         {
-            if (GetDeviceState(e.SessionInfo.DeviceId) != DeviceState.Stopped)
+            var session = e.SessionInfo;
+            if (session == null) return;
+
+            try
             {
-                var user = userManager.GetUserById(e.SessionInfo.UserId);
-                await PlaybackEvent(HookEvent.Stop, e.SessionInfo.FullNowPlayingItem, e.SessionInfo, user);
+                if (session.UserId != Guid.Empty && GetDeviceState(session.DeviceId) != DeviceState.Stopped)
+                {
+                    var user = userManager.GetUserById(session.UserId);
+                    await PlaybackEvent(HookEvent.Stop, session.FullNowPlayingItem, session, user);
+                }
+
+                await SessionEvent(HookEvent.SessionEnded, session);
             }
+            finally
+            {
+                if (session.DeviceId != null) ClearDeviceState(session.DeviceId);
+            }
+        });
 
-            await SessionEvent(HookEvent.SessionEnded, e.SessionInfo);
-            ClearDeviceState(e.SessionInfo.DeviceId);
-        }
-
-        private async void OnSubtitleDownloadFailure(object sender, SubtitleDownloadFailureEventArgs e)
+        private async void OnSubtitleDownloadFailure(object sender, SubtitleDownloadFailureEventArgs e) => await HandleEventAsync(async () =>
         {
             await _sender.Send(new EventInfo
             {
@@ -181,9 +208,9 @@ namespace Jellyfin.Webhooks
                     Version = appHost.ApplicationVersion.ToString(),
                 },
             });
-        }
+        });
 
-        private async void HasPendingRestartChanged(object sender, EventArgs e)
+        private async void HasPendingRestartChanged(object sender, EventArgs e) => await HandleEventAsync(async () =>
         {
             await _sender.Send(new EventInfo
             {
@@ -195,7 +222,7 @@ namespace Jellyfin.Webhooks
                     Version = appHost.ApplicationVersion.ToString(),
                 },
             });
-        }
+        });
 
         private async Task SessionEvent(HookEvent evt, SessionInfo session)
         {
