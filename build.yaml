@@ -1,7 +1,7 @@
 ---
 name: "Webhooks"
-guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
-version: "3.9.0.120000"
+guid: "d8ca599b-ab3c-41b0-a4ea-6de1d52b9996"
+version: "3.10.1.120000"
 targetAbi: "12.0.0.0"
 framework: "net10.0"
 overview: "Webhooks. Flexible and robust"
@@ -10,4 +10,4 @@ category: "General"
 owner: "shemanaev"
 artifacts:
   - "Jellyfin.Webhooks.dll"
-changelog: "Jellyfin 12.1 compatibility"
+changelog: "Jellyfin 12.0 compatibility"

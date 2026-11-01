@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <PluginName Condition="'$(PluginName)' == ''">Webhooks</PluginName>
-    <PluginGuid Condition="'$(PluginGuid)' == ''">eb5d7894-8eef-4b36-aa6f-5d124e828ce1</PluginGuid>
+    <PluginGuid Condition="'$(PluginGuid)' == ''">d8ca599b-ab3c-41b0-a4ea-6de1d52b9996</PluginGuid>
     <PluginOverview Condition="'$(PluginOverview)' == ''">Webhooks. Flexible and robust</PluginOverview>
     <PluginDescription Condition="'$(PluginDescription)' == ''">Supports couple of webhook types including Plex one.</PluginDescription>
     <PluginCategory Condition="'$(PluginCategory)' == ''">General</PluginCategory>
